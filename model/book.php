@@ -61,4 +61,9 @@ class Book
         }
         return $listBook;
     }
+    static function AddToFile($content){
+        $myfile = fopen("data/book.txt", "a") or die("Unable to open file!");
+        fwrite($myfile, "\n". $content);
+        fclose($myfile);
+    }
 }

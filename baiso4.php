@@ -4,6 +4,17 @@
 <?php
 #Code bài số 4
 include_once("model/book.php");
+$id = $Title = $search = "";
+	if (isset($_REQUEST["addBook"])) {
+		$id = $_REQUEST["id"];
+		$Title = $_REQUEST["Title"];
+		$Price = $_REQUEST["Price"];
+		$Author = $_REQUEST["Author"];
+		$Year = $_REQUEST["Year"];
+		$content = $id . "#" . $Title . "#" . $Price . "#" . $Author . "#" . $Year;		
+		book::AddToFile($content);
+		//echo "<meta http-equiv='refresh' content='0'>";
+	}
 $book = new Book(1,50, "Kỵ sỹ bóng đêm - Joker", "ducnghia69", 2019);
 // $book->display();
 	$ls = $book::getListFromFile();
@@ -13,8 +24,10 @@ $book = new Book(1,50, "Kỵ sỹ bóng đêm - Joker", "ducnghia69", 2019);
             <input type="text" name="search" class="form-control" placeholder="Search for book..." aria-label="Search" aria-describedby="basic-addon2">
         </div>
 </form>
+
 <?php
-	if ($_SERVER["REQUEST_METHOD"] == "POST") {
+	
+	if (isset($_REQUEST["search"]) ) {
 		$search = $_POST['search'];
 		if($search != null || $search != "")
 			$ls = $book::Search($search);
@@ -137,8 +150,14 @@ $book = new Book(1,50, "Kỵ sỹ bóng đêm - Joker", "ducnghia69", 2019);
 				<legend>Add Book </legend>
 			</div>
 			<div class="modal-body">
-				<form class="form-horizontal">
+				<form class="form-horizontal" id="addForm" method="POST">
 					<fieldset>
+					<div class="form-group d-flex">
+							<label class="pt-1 col-md-2 control-label" for="Title">ID</label>
+							<div class="col-md-10">
+								<input id="id" name="id" type="text" placeholder="ID" class="form-control input-md">
+							</div>
+						</div>
 						<div class="form-group d-flex">
 							<label class="pt-1 col-md-2 control-label" for="Title">Title</label>
 							<div class="col-md-10">
@@ -148,7 +167,7 @@ $book = new Book(1,50, "Kỵ sỹ bóng đêm - Joker", "ducnghia69", 2019);
 						<div class="form-group d-flex">
 							<label class="pt-1 col-md-2 control-label" for="Title">Price</label>
 							<div class="col-md-10">
-								<input id="Title" name="Title" type="text" placeholder="Title" class="form-control input-md">
+								<input id="Title" name="Price" type="text" placeholder="Price" class="form-control input-md">
 							</div>
 						</div>
 						<!-- Select Basic -->
@@ -182,10 +201,12 @@ $book = new Book(1,50, "Kỵ sỹ bóng đêm - Joker", "ducnghia69", 2019);
 				</form>
 			</div>
 			<div class="modal-footer">
-				<button class="btn btn-outline-success col-md-2" type="button" data-dismiss="modal">Edit</button>
+				<button type="submit" name="addBook" class="btn btn-outline-success col-md-2" form="addForm" value="Submit">Submit</button>
+				<!-- <button type="submit" form="addForm" class="btn btn-outline-success col-md-2" data-dismiss="modal">Add</button> -->
 				<button class="btn btn-outline-primary col-md-2" type="button" data-dismiss="modal">Cancel</button>
 			</div>
 		</div>
 	</div>
 </div>
+
 <?php include_once("footer.php") ?>
