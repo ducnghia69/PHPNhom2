@@ -1,17 +1,15 @@
-<?php
-class Book
-{
-    #Begin properties
+<?php 
+class Book {
+    #properties
     var $id;
     var $price;
     var $title;
     var $author;
     var $year;
-    #end properties
+    #endProperties
 
     #Construct function
-    function __construct($id,$price, $title, $author, $year)
-    {
+    function __construct ($id, $price, $title, $author, $year) {
         $this->id = $id;
         $this->price = $price;
         $this->title = $title;
@@ -20,50 +18,93 @@ class Book
     }
 
     #Member function
-    function display()
-    {
-        echo "ID: " . $this->id . "<br>";
+    function display() {
         echo "Price: " . $this->price . "<br>";
         echo "Title: " . $this->title . "<br>";
         echo "Author: " . $this->author . "<br>";
         echo "Year: " . $this->year . "<br>";
     }
-    static function getList(){
+    static function getList() {
         $listBook = array();
-        array_push($listBook, new Book(1,5, "OOP in PHP", "nghiaPHP", 2019));
-        array_push($listBook, new Book(2,3, "OOP in JAVA", "nghiaJAVA", 2017));
-        array_push($listBook, new Book(3,10, "OOP in Python", "nghiaPython", 2020));
-        array_push($listBook, new Book(4,15, "OOP in Ruby on Rails", "nghiaRuby", 2016));
+        array_push($listBook, new Book(1,5, "Java", "nghiaJava", 2019)); //Thêm 1 phần tử vào mảng
+        array_push($listBook, new Book(2,6, "OOP", "nghiaOOP", 2018));
+        array_push($listBook, new Book(3,7, "Ruby", "nghiaRuby", 2017));
+        array_push($listBook, new Book(4,8, "Rails", "nghiaRails", 2016));
+        array_push($listBook, new Book(5,9, "Tomcat", "nghiaTomcat", 2015));
         return $listBook;
     }
-    /**
-     * Lấy dữ liệu từ file
-     */
-    static function getListFromFile(){
-        $arrayData = file("data/book.txt");
-        $listBook = array();
-        foreach($arrayData as $key => $value){
-            $arrayItem = explode("#",$value);
-            $book = new Book($arrayItem[0],$arrayItem[1],$arrayItem[2],$arrayItem[3],$arrayItem[4]);
-            array_push($listBook, $book);
+    static function getListFromFile($search = null){
+        $data = file("data/book.txt");
+        $arrBook = [];
+        foreach($data as $key => $value){
+            $row = explode("#",$value); //tách chuỗi ngăn bởi #
+            if(
+                strlen(strstr($row[0],$search)) || strlen(strstr($row[3],$search)) ||
+                strlen(strstr($row[1],$search)) || strlen(strstr($row[4],$search)) ||
+                strlen(strstr($row[2],$search)) || $search == null
+            )
+            $arrBook[] = new Book($row[0],$row[1],$row[2],$row[3],$row[4]);
         }
-        return $listBook;
+        return $arrBook;
     }
-    static function Search($contentSearch){
-        $arrayData = file("data/book.txt");
-        $listBook = array();
-        foreach($arrayData as $key => $value){
-            $arrayItem = explode("#",$value);
-            if(strstr( strtoupper($arrayItem[2]), strtoupper($contentSearch)) || strstr( strtoupper($arrayItem[3]), strtoupper($contentSearch)) || $contentSearch == substr($arrayItem[4],0, strlen($arrayItem[4])-2)){
-                $book = new Book($arrayItem[0],$arrayItem[1],$arrayItem[2],$arrayItem[3],$arrayItem[4]);           
-                array_push($listBook, $book);
-            }          
-        }
-        return $listBook;
-    }
-    static function AddToFile($content){
+    static function addToFile($content){
+        
         $myfile = fopen("data/book.txt", "a") or die("Unable to open file!");
-        fwrite($myfile, "\n". $content);
+        if(Book::checkLineFeedLastText())
+            fwrite($myfile, "". $content);
+        else
+            fwrite($myfile, "\n". $content);
         fclose($myfile);
+    }
+    static function delete($id){
+        $data = Book::getListFromFile();
+        $data_res = [];
+        foreach($data as $key => $value){
+            if($value->id != $id){
+                $data_res[] = $value;
+            }
+        }    
+        $text_write = "";
+        $myfile = fopen("data/book.txt", "w") or die("Unable to open file!");
+        foreach($data_res as $key => $value){
+            $text_write.= $value->id."#".$value->price."#".$value->title."#".$value->author."#".$value->year;            
+        }
+      
+        fwrite($myfile, $text_write);
+        fclose($myfile);
+    }
+    static function edit(Book $content){
+        $data = Book::getListFromFile();
+        $text_write = "";
+        $myfile = fopen("data/book.txt", "w") or die("Unable to open file!");
+        foreach($data as $key => $value){          
+            if( $content->id == $value->id){
+                $text_write.= $content->id."#".$content->price."#".$content->title."#".$content->author."#".$content->year."\n";
+            }  
+            else $text_write.= $value->id."#".$value->price."#".$value->title."#".$value->author."#".$value->year;
+        }       
+        fwrite($myfile, $text_write);
+        fclose($myfile);
+    }
+    static function getSTT(){
+        $max = 0;
+        $data = Book::getListFromFile();
+        foreach($data as $key => $value){
+            $max =  max($value->id,$max);
+        }  
+        return $max+1;
+    }
+    static function checkLineFeedLastText(){
+        $data="data/book.txt";
+        $linecount = 0;
+        $handle = fopen($data, "r");
+        while(!feof($handle)){
+            $line = fgets($handle);
+            $linecount++;
+        }      
+        fclose($handle); 
+        $count = sizeof(Book::getListFromFile());
+        if($linecount > $count) return true;
+        return false;
     }
 }

@@ -1,18 +1,5 @@
-1#5#OOP in PHP#nghiaPHP#2019
-2#3#OOP in JAVA#nghiaJAVA#2017
-3#10#OOP in Python#nghiaPython#2020
-4#15#OOP in Ruby on Rails#nghiaRuby#2016
-5#69#OOP in MVC #nghiaMVC#2016
-6#96#OOP in ROR #nghiaROR#2020
-96969696#9696969#69696969#69696969#2019
-123#456#789#12321321#2016
-222#2222#222#222#2019
-333#333#333#4444#2019
-12321#312321#3123123#213213#2019
-nghia#nghia#nghia#nghia#2019
-nghia#nghia#nghia#nghia#2019
-nghia#nghia#nghia#nghia#2019
-nghia2#nghia2#nghia2#nghia2#2019
-nghia2#nghia2#nghia2#nghia2#2019
-nghia3#nghia3#nghia3#nghia3#2013
-nghia5#nghia5#nghia5#nghia5#2019
+1#15#nghia1#nghia1#1999
+2#16#nghia2#nghia2#1111
+3#123#NGHIA PROJECT#123#123
+4#3#231232#23#23
+5#3232#323#232#69

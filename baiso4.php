@@ -2,211 +2,193 @@
 <?php include_once("nav.php") ?>
 
 <?php
-#Code bài số 4
-include_once("model/book.php");
-$id = $Title = $search = "";
-	if (isset($_REQUEST["addBook"])) {
-		$id = $_REQUEST["id"];
-		$Title = $_REQUEST["Title"];
-		$Price = $_REQUEST["Price"];
-		$Author = $_REQUEST["Author"];
-		$Year = $_REQUEST["Year"];
-		$content = $id . "#" . $Title . "#" . $Price . "#" . $Author . "#" . $Year;		
-		book::AddToFile($content);
-		//echo "<meta http-equiv='refresh' content='0'>";
-	}
-$book = new Book(1,50, "Kỵ sỹ bóng đêm - Joker", "ducnghia69", 2019);
-// $book->display();
-	$ls = $book::getListFromFile();
-?>
- <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0 text-center" method="post">
-        <div class="input-group">
-            <input type="text" name="search" class="form-control" placeholder="Search for book..." aria-label="Search" aria-describedby="basic-addon2">
-        </div>
-</form>
+#Code bài 4
+include_once("model/book.php"); //nhét file book.php vô để xài
+//$book->display();
+//$listBook = $book->getList();
+$listBook = Book::getList(); //vì getList là static nên phải gọi như này
+//$lsFromFile = Book::getListFromFile();
 
-<?php
-	
-	if (isset($_REQUEST["search"]) ) {
-		$search = $_POST['search'];
-		if($search != null || $search != "")
-			$ls = $book::Search($search);
-		else $ls = $book::getListFromFile();
-	}
+/**
+ * Thêm mới
+ */
+if (isset($_REQUEST["add"])) {
+	$id = Book::getSTT();
+	$title = $_REQUEST["title"];
+	$price = $_REQUEST["price"];
+	$author = $_REQUEST["author"];
+	$year = $_REQUEST["year"];	
+	$content = $id . "#" . $price . "#" . $title . "#" . $author . "#" . $year;
+	Book::addToFile($content);
+}
+/**
+ * Edit
+ */
+else if (isset($_REQUEST["edit"])) {	
+	$id = $_REQUEST["edit"];
+	$title = $_REQUEST["title"];
+	$price = $_REQUEST["price"];
+	$author = $_REQUEST["author"];
+	$year = $_REQUEST["year"];
+	$bookEditer =  new Book($id, $title, $price, $author, $year);
+	Book::edit($bookEditer);
+}
+/**
+ * Xóa
+ */
+else if (isset($_REQUEST["del"])) {
+	$id = $_REQUEST["del"];
+	Book::delete($id);
+}
+
+/**
+ * Hàm thêm DL vào ds/search
+ */
+$keyWord = null;
+if (strpos($_SERVER['REQUEST_URI'], "search")) {
+	$keyWord = $_REQUEST['search'];
+}
+$lsFromFile = Book::getListFromFile($keyWord);
+
 ?>
-<div class="container-fluid">
-	<div class="table-responsive">
-		<table class="table table-hover table-bordered">
-			<div  class="btn-add d-flex justify-content-end align-items-center pb-3">
-				<button class="btn btn-outline-primary" data-toggle="modal" data-target="#addBook"><i class="fas fa-plus-circle"></i> Thêm</button>
-			</div>
-			<thead class="thead-dark">
+<div class="container pt-5">
+	<button class="btn btn-outline-info float-right" data-toggle="modal" data-target="#addItem"><i class="fas fa-plus-circle"></i> Thêm</button>
+	<form action="" method="GET">
+		<div class="form-group">
+			<input class="form-control" name="search" style="max-width: 200px; display:inline-block;" placeholder="Search">
+			<button type="submit" class="btn btn-default" style="margin-left:-50px"><i class="fas fa-search"></i></button>
+		</div>
+	</form>
+	<table class="table">
+		<thead class="thead-dark">
+			<tr>
+				<th scope="col">STT</th>
+				<th scope="col">Tên</th>
+				<th scope="col">Giá</th>
+				<th scope="col">Tác giả</th>
+				<th scope="col">Năm</th>
+				<th scope="col">Thao tác</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php
+			for ($i = 0; $i < count($lsFromFile); $i++) { ?>
 				<tr>
-					<th scope="col">ID</th>
-					<th scope="col">Title</th>
-					<th scope="col">Price</th>
-					<th scope="col">Author</th>
-					<th scope="col">Year</th>
-					<th scope="col">Thao tác</th>
+					<th scope="row"><?php echo $lsFromFile[$i]->id ?></th>
+					<td><?php echo $lsFromFile[$i]->title ?></td>
+					<td><?php echo $lsFromFile[$i]->price ?></td>
+					<td><?php echo $lsFromFile[$i]->author ?></td>
+					<td><?php echo $lsFromFile[$i]->year ?></td>
+					<td class="d-flex">
+						<button class="btn btn-outline-info mr-3" data-toggle="modal" data-target="#editItem<?php echo $i ?>"><i class="far fa-edit"></i> Sửa</button>
+						<button class="btn btn-outline-danger" name="delete" data-toggle="modal" data-target="#deleteItem<?php echo $i ?>"><i class="fas fa-trash-alt"></i> Xóa</button>
+						<!--Edit-->
+						<form action="" method="GET">
+							<div class="modal fade" id="editItem<?php echo $i ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+								<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h5 class="modal-title" id="exampleModalLongTitle">Edit</h5>
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">&times;</span>
+											</button>
+										</div>
+										<div class="modal-body">
+											<form>
+												<div class="form-group ">
+													<label for="from">Tên</label>
+													<input type="text" name="title" class="form-control" value="<?php echo $lsFromFile[$i]->title ?>" placeholder="Tên">
+												</div>
+												<div class="form-group">
+													<label for="to">Giá</label>
+													<input type="number" name="price" class="form-control" value="<?php echo $lsFromFile[$i]->price ?>" placeholder="Giá">
+												</div>
+												<div class="form-group">
+													<label for="class">Tác giả</label>
+													<input type="text" name="author" class="form-control" value="<?php echo $lsFromFile[$i]->author ?>" placeholder="Tác giả">
+												</div>
+												<div class="form-group">
+													<label for="place">Năm</label>
+													<input type="text" name="year" class="form-control" value="<?php echo $lsFromFile[$i]->year ?>" placeholder="Năm">
+												</div>
+												<div class="modal-footer">
+												<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+													<button class="btn btn-primary" name="edit" type="submit" value="<?php echo $lsFromFile[$i]->id ?>">Save changes</button>
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+							</div>
+						</form>
+						<!--end Edit-->
+
+						<!--Delete-->
+						<form action="" method="DELETE">
+							<div class="modal fade" id="deleteItem<?php echo $i ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+								<div class="modal-dialog" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h5 class="modal-title" id="exampleModalLabel">Notice</h5>
+											<button class="close" type="button" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body">Do you want to delete this?</div>
+										<div class="modal-footer">
+											<button class="btn btn-danger" name="del" type="submit" value="<?php echo $lsFromFile[$i]->id ?>">Delete</button>
+											<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</form>
+						<!--end Delete-->
+					</td>
 				</tr>
-			</thead>
-			<tbody>
-				<?php for ($i = 0; $i < count($ls); $i++) {   ?>
-					<tr>
-						<th scope="row"><?php echo $ls[$i]->id ?></th>
-						<td><?php echo $ls[$i]->title ?></td>
-						<td><?php echo $ls[$i]->price ?></td>
-						<td><?php echo $ls[$i]->author ?></td>
-						<td><?php echo $ls[$i]->year ?></td>
-						<td class="d-flex">
-							<button class="btn btn-outline-success mr-3" data-toggle="modal" data-target="#editBook"><i class="far fa-edit"></i> Sửa</button>
-							<button class="btn btn-outline-danger" data-toggle="modal" data-target="#deleteBook"><i class="fas fa-trash-alt"></i> Xóa</button>
-						</td>
-					</tr>
-				<?php } ?>
-			</tbody>
-		</table>
-	</div>
+			<?php } ?>
+		</tbody>
+	</table>
 </div>
-<div class="modal fade" id="deleteBook" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-	<div class="modal-dialog" role="document">
+
+<!--Add-->
+<div class="modal fade" id="addItem" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="exampleModalLabel">Notice</h5>
-				<button class="close" type="button" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">×</span>
+				<h5 class="modal-title" id="exampleModalLongTitle">Add book</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
-			<div class="modal-body">Do you want to delete this book?</div>
-			<div class="modal-footer">
-				<button class="btn btn-danger" type="button" data-dismiss="modal">Delete</button>
-				<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-			</div>
-		</div>
-	</div>
-</div>
-<div class="modal fade" id="editBook" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<legend>Edit Book </legend>
-			</div>
 			<div class="modal-body">
-				<form class="form-horizontal">
-					<fieldset>
-						<div class="form-group d-flex">
-							<label class="pt-1 col-md-2 control-label" for="Title">Title</label>
-							<div class="col-md-10">
-								<input id="Title" name="Title" type="text" placeholder="Title" class="form-control input-md">
-							</div>
-						</div>
-						<div class="form-group d-flex">
-							<label class="pt-1 col-md-2 control-label" for="Title">Price</label>
-							<div class="col-md-10">
-								<input id="Title" name="Title" type="text" placeholder="Title" class="form-control input-md">
-							</div>
-						</div>
-						<!-- Select Basic -->
-						<div class="form-group d-flex">
-							<label class="pt-1 col-md-2 control-label" for="Year">Year</label>
-							<div class="col-md-10">
-								<select id="Year" name="Year" class="form-control">
-									<option value="2019">2019</option>
-									<option value="2018">2018</option>
-									<option value="2017">2017</option>
-									<option value="2016">2016</option>
-									<option value="2015">2015</option>
-									<option value="2014">2014</option>
-									<option value="2013">2013</option>
-									<option value="2012">2012</option>
-									<option value="2011">2011</option>
-									<option value="2010">2010</option>
-								</select>
-							</div>
-						</div>
-
-						<!-- Text input-->
-						<div class="form-group d-flex">
-							<label class="pt-1 col-md-2 control-label" for="Author">Author</label>
-							<div class="col-md-10">
-								<input id="Author" name="Author" type="text" placeholder="Author" class="form-control input-md">
-
-							</div>
-						</div>
-					</fieldset>
+				<form method="post">
+					<div class="form-group ">
+						<label for="from">Tên</label>
+						<input type="text" class="form-control" name="title" placeholder="Tên">
+					</div>
+					<div class="form-group">
+						<label for="to">Giá</label>
+						<input type="number" class="form-control" name="price" placeholder="Giá">
+					</div>
+					<div class="form-group">
+						<label for="class">Tác giả</label>
+						<input type="text" class="form-control" name="author" placeholder="Tác giả">
+					</div>
+					<div class="form-group">
+						<label for="place">Năm</label>
+						<input type="number" class="form-control" name="year" placeholder="Năm">
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+						<button type="submit" class="btn btn-primary" name="add">Save changes</button>
+					</div>
 				</form>
 			</div>
-			<div class="modal-footer">
-				<button class="btn btn-outline-success col-md-2" type="button" data-dismiss="modal">Edit</button>
-				<button class="btn btn-outline-primary col-md-2" type="button" data-dismiss="modal">Cancel</button>
-			</div>
 		</div>
 	</div>
 </div>
-<div class="modal fade" id="addBook" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<legend>Add Book </legend>
-			</div>
-			<div class="modal-body">
-				<form class="form-horizontal" id="addForm" method="POST">
-					<fieldset>
-					<div class="form-group d-flex">
-							<label class="pt-1 col-md-2 control-label" for="Title">ID</label>
-							<div class="col-md-10">
-								<input id="id" name="id" type="text" placeholder="ID" class="form-control input-md">
-							</div>
-						</div>
-						<div class="form-group d-flex">
-							<label class="pt-1 col-md-2 control-label" for="Title">Title</label>
-							<div class="col-md-10">
-								<input id="Title" name="Title" type="text" placeholder="Title" class="form-control input-md">
-							</div>
-						</div>
-						<div class="form-group d-flex">
-							<label class="pt-1 col-md-2 control-label" for="Title">Price</label>
-							<div class="col-md-10">
-								<input id="Title" name="Price" type="text" placeholder="Price" class="form-control input-md">
-							</div>
-						</div>
-						<!-- Select Basic -->
-						<div class="form-group d-flex">
-							<label class="pt-1 col-md-2 control-label" for="Year">Year</label>
-							<div class="col-md-10">
-								<select id="Year" name="Year" class="form-control">
-									<option value="2019">2019</option>
-									<option value="2018">2018</option>
-									<option value="2017">2017</option>
-									<option value="2016">2016</option>
-									<option value="2015">2015</option>
-									<option value="2014">2014</option>
-									<option value="2013">2013</option>
-									<option value="2012">2012</option>
-									<option value="2011">2011</option>
-									<option value="2010">2010</option>
-								</select>
-							</div>
-						</div>
+<!--End Add-->
 
-						<!-- Text input-->
-						<div class="form-group d-flex">
-							<label class="pt-1 col-md-2 control-label" for="Author">Author</label>
-							<div class="col-md-10">
-								<input id="Author" name="Author" type="text" placeholder="Author" class="form-control input-md">
-
-							</div>
-						</div>
-					</fieldset>
-				</form>
-			</div>
-			<div class="modal-footer">
-				<button type="submit" name="addBook" class="btn btn-outline-success col-md-2" form="addForm" value="Submit">Submit</button>
-				<!-- <button type="submit" form="addForm" class="btn btn-outline-success col-md-2" data-dismiss="modal">Add</button> -->
-				<button class="btn btn-outline-primary col-md-2" type="button" data-dismiss="modal">Cancel</button>
-			</div>
-		</div>
-	</div>
-</div>
 
 <?php include_once("footer.php") ?>
