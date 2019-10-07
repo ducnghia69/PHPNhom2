@@ -30,7 +30,7 @@ else if (isset($_REQUEST["edit"])) {
 	$price = $_REQUEST["price"];
 	$author = $_REQUEST["author"];
 	$year = $_REQUEST["year"];
-	$bookEditer =  new Book($id, $title, $price, $author, $year);
+	$bookEditer =  new Book($id, $price, $title, $author, $year);
 	Book::edit($bookEditer);
 }
 /**

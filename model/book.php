@@ -79,7 +79,7 @@ class Book {
         $myfile = fopen("data/book.txt", "w") or die("Unable to open file!");
         foreach($data as $key => $value){          
             if( $content->id == $value->id){
-                $text_write.= $content->id."#".$content->title."#".$content->price."#".$content->author."#".$content->year."\n";
+                $text_write.= $content->id."#".$content->price."#".$content->title."#".$content->author."#".$content->year."\n";
             }  
             else $text_write.= $value->id."#".$value->price."#".$value->title."#".$value->author."#".$value->year;
         }       
