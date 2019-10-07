@@ -34,6 +34,7 @@ class Book {
         return $listBook;
     }
     static function getListFromFile($search = null){
+  
         $data = file("data/book.txt");
         $arrBook = [];
         foreach($data as $key => $value){

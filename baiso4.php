@@ -48,8 +48,8 @@ $keyWord = null;
 if (strpos($_SERVER['REQUEST_URI'], "search")) {
 	$keyWord = $_REQUEST['search'];
 }
+if($keyWord == "") $keyWord = null;
 $lsFromFile = Book::getListFromFile($keyWord);
-
 ?>
 <div class="container pt-5">
 	<button class="btn btn-outline-info float-right" data-toggle="modal" data-target="#addItem"><i class="fas fa-plus-circle"></i> Thêm</button>
