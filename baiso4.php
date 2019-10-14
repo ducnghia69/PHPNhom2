@@ -50,6 +50,20 @@ if (strpos($_SERVER['REQUEST_URI'], "search")) {
 }
 if($keyWord == "") $keyWord = null;
 $lsFromFile = Book::getListFromFile($keyWord);
+
+//Chia 1 trang gồm 5 trường
+$numberPage = 5;
+if(count($lsFromFile)%$numberPage == 0)
+	$countPage = intval(count($lsFromFile)/$numberPage);
+else $countPage = intval(count($lsFromFile)/$numberPage) + 1;
+//lấy request
+if (isset($_REQUEST["page"])) {	
+	$page = $_REQUEST["page"];
+}else $page = 1;
+$fromPage = $page*$numberPage - $numberPage;
+$toPage = $page*$numberPage ;
+if($toPage > count($lsFromFile))
+	$toPage = count($lsFromFile);
 ?>
 <div class="container pt-5">
 	<button class="btn btn-outline-info float-right" data-toggle="modal" data-target="#addItem"><i class="fas fa-plus-circle"></i> Thêm</button>
@@ -72,7 +86,7 @@ $lsFromFile = Book::getListFromFile($keyWord);
 		</thead>
 		<tbody>
 			<?php
-			for ($i = 0; $i < count($lsFromFile); $i++) { ?>
+			for ($i = $fromPage; $i < $toPage; $i++) { ?>
 				<tr>
 					<th scope="row"><?php echo $lsFromFile[$i]->id ?></th>
 					<td><?php echo $lsFromFile[$i]->title ?></td>
@@ -147,8 +161,42 @@ $lsFromFile = Book::getListFromFile($keyWord);
 					</td>
 				</tr>
 			<?php } ?>
+			
 		</tbody>
 	</table>
+	<nav aria-label="navigation" >
+		<ul class="pagination d-flex justify-content-center">
+					<li class="page-item <?php 
+							if (isset($_REQUEST["page"])) {	
+								$page = $_REQUEST["page"];
+								if($page == 1) echo "disabled";
+							}else if($page == 1) echo "disabled";
+						?>"><a class="page-link" href="baiso4.php?page=<?php 
+						if (isset($_REQUEST["page"])) {	
+							$page = $_REQUEST["page"] - 1;						
+						}
+						echo $page;
+					?>">Previous</a></li>
+					<?php
+					for($i = 1; $i <= $countPage; $i++){?>
+						<li class="page-item <?php 
+							if (isset($_REQUEST["page"])) {	
+								$page = $_REQUEST["page"];
+								if($page == $i) echo "active";
+							}else if($i == 1) echo "active";
+						?>"><a class="page-link" href="baiso4.php?page=<?php echo $i ?>"><?php echo $i ?></a></li>
+					<?php } ?>
+					<li class="page-item <?php 
+							if (isset($_REQUEST["page"])) {	
+								$page = $_REQUEST["page"] + 1;
+								if($page >  $countPage) echo "disabled";
+							}
+						?>"><a class="page-link" href="baiso4.php?page=<?php 
+								if($page >  $countPage  ) $page =  $countPage;
+							echo $page;
+					?>">Next</a></li>
+		</ul>
+	</nav>
 </div>
 
 <!--Add-->
