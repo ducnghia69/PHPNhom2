@@ -172,9 +172,9 @@ if($toPage > count($lsFromFile))
 								if($page == 1) echo "disabled";
 							}else if($page == 1) echo "disabled";
 						?>"><a class="page-link" href="baiso4.php?page=<?php 
-						if (isset($_REQUEST["page"])) {	
-							$page = $_REQUEST["page"] - 1;						
-						}
+							if (isset($_REQUEST["page"])) {	
+								$page = $_REQUEST["page"] - 1;						
+							}
 						echo $page;
 					?>">Previous</a></li>
 					<?php
