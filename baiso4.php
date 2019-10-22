@@ -18,8 +18,10 @@ if (isset($_REQUEST["add"])) {
 	$price = $_REQUEST["price"];
 	$author = $_REQUEST["author"];
 	$year = $_REQUEST["year"];	
-	$content = $id . "#" . $price . "#" . $title . "#" . $author . "#" . $year;
-	Book::addToFile($content);
+	$bookCreate =  new Book($id, $price, $title, $author, $year);
+	//$content = $id . "#" . $price . "#" . $title . "#" . $author . "#" . $year;
+	//Book::addToFile($content);
+	Book::addToDB($bookCreate);
 }
 /**
  * Edit
@@ -31,14 +33,16 @@ else if (isset($_REQUEST["edit"])) {
 	$author = $_REQUEST["author"];
 	$year = $_REQUEST["year"];
 	$bookEditer =  new Book($id, $price, $title, $author, $year);
-	Book::edit($bookEditer);
+	//Book::edit($bookEditer);
+	Book::editDB($bookEditer);
 }
 /**
  * Xóa
  */
 else if (isset($_REQUEST["del"])) {
 	$id = $_REQUEST["del"];
-	Book::delete($id);
+	//Book::delete($id);
+	Book::deleteDB($id);
 }
 
 /**
@@ -64,6 +68,28 @@ $fromPage = $page*$numberPage - $numberPage;
 $toPage = $page*$numberPage ;
 if($toPage > count($lsFromFile))
 	$toPage = count($lsFromFile);
+//Test DB
+
+$lsFormDB = Book::getListFromDB();
+
+/* Kết nối với database
+	for ($i = 0; $i < count($lsFormDB); $i++) { ?>
+				<tr>
+					<th scope="row"><?php echo $lsFormDB[$i]->id ?></th>
+					<td><?php echo $lsFormDB[$i]->title ?></td>
+					<td><?php echo $lsFormDB[$i]->price ?></td>
+					<td><?php echo $lsFormDB[$i]->author ?></td>
+					<td><?php echo $lsFormDB[$i]->year ?></td>
+*/
+/* Kết nối với file
+	for ($i = $fromPage; $i < $toPage; $i++) { ?>
+				<tr>
+					<th scope="row"><?php echo $lsFromFile[$i]->id ?></th>
+					<td><?php echo $lsFromFile[$i]->title ?></td>
+					<td><?php echo $lsFromFile[$i]->price ?></td>
+					<td><?php echo $lsFromFile[$i]->author ?></td>
+					<td><?php echo $lsFromFile[$i]->year ?></td>
+*/
 ?>
 <div class="container pt-5">
 	<button class="btn btn-outline-info float-right" data-toggle="modal" data-target="#addItem"><i class="fas fa-plus-circle"></i> Thêm</button>
@@ -86,18 +112,18 @@ if($toPage > count($lsFromFile))
 		</thead>
 		<tbody>
 			<?php
-			for ($i = $fromPage; $i < $toPage; $i++) { ?>
+			for ($i = 0; $i < count($lsFormDB); $i++) { ?>
 				<tr>
-					<th scope="row"><?php echo $lsFromFile[$i]->id ?></th>
-					<td><?php echo $lsFromFile[$i]->title ?></td>
-					<td><?php echo $lsFromFile[$i]->price ?></td>
-					<td><?php echo $lsFromFile[$i]->author ?></td>
-					<td><?php echo $lsFromFile[$i]->year ?></td>
+					<th scope="row"><?php echo $lsFormDB[$i]->id ?></th>
+					<td><?php echo $lsFormDB[$i]->title ?></td>
+					<td><?php echo $lsFormDB[$i]->price ?></td>
+					<td><?php echo $lsFormDB[$i]->author ?></td>
+					<td><?php echo $lsFormDB[$i]->year ?></td>
 					<td class="d-flex">
 						<button class="btn btn-outline-info mr-3" data-toggle="modal" data-target="#editItem<?php echo $i ?>"><i class="far fa-edit"></i> Sửa</button>
 						<button class="btn btn-outline-danger" name="delete" data-toggle="modal" data-target="#deleteItem<?php echo $i ?>"><i class="fas fa-trash-alt"></i> Xóa</button>
 						<!--Edit-->
-						<form action="" method="GET">
+						<form action="" method="POST">
 							<div class="modal fade" id="editItem<?php echo $i ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
 								<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
 									<div class="modal-content">
@@ -111,23 +137,23 @@ if($toPage > count($lsFromFile))
 											<form>
 												<div class="form-group ">
 													<label for="from">Tên</label>
-													<input type="text" name="title" class="form-control" value="<?php echo $lsFromFile[$i]->title ?>" placeholder="Tên">
+													<input type="text" name="title" class="form-control" value="<?php echo $lsFormDB[$i]->title ?>" placeholder="Tên">
 												</div>
 												<div class="form-group">
 													<label for="to">Giá</label>
-													<input type="number" name="price" class="form-control" value="<?php echo $lsFromFile[$i]->price ?>" placeholder="Giá">
+													<input type="number" name="price" class="form-control" value="<?php echo $lsFormDB[$i]->price ?>" placeholder="Giá">
 												</div>
 												<div class="form-group">
 													<label for="class">Tác giả</label>
-													<input type="text" name="author" class="form-control" value="<?php echo $lsFromFile[$i]->author ?>" placeholder="Tác giả">
+													<input type="text" name="author" class="form-control" value="<?php echo $lsFormDB[$i]->author ?>" placeholder="Tác giả">
 												</div>
 												<div class="form-group">
 													<label for="place">Năm</label>
-													<input type="text" name="year" class="form-control" value="<?php echo $lsFromFile[$i]->year ?>" placeholder="Năm">
+													<input type="text" name="year" class="form-control" value="<?php echo $lsFormDB[$i]->year ?>" placeholder="Năm">
 												</div>
 												<div class="modal-footer">
 												<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-													<button class="btn btn-primary" name="edit" type="submit" value="<?php echo $lsFromFile[$i]->id ?>">Save changes</button>
+													<button class="btn btn-primary" name="edit" type="submit" value="<?php echo $lsFormDB[$i]->id ?>">Save changes</button>
 												</div>
 											</form>
 										</div>
@@ -150,7 +176,7 @@ if($toPage > count($lsFromFile))
 										</div>
 										<div class="modal-body">Do you want to delete this?</div>
 										<div class="modal-footer">
-											<button class="btn btn-danger" name="del" type="submit" value="<?php echo $lsFromFile[$i]->id ?>">Delete</button>
+											<button class="btn btn-danger" name="del" type="submit" value="<?php echo $lsFormDB[$i]->id ?>">Delete</button>
 											<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
 										</div>
 									</div>

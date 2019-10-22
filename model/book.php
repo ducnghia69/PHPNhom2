@@ -16,7 +16,16 @@ class Book {
         $this->author = $author;
         $this->year = $year;
     }
-
+    static function connect(){
+        //B1: Tạo kết nối
+        $conn = new mysqli("localhost","root","","BookManager");
+        //B2: Thao tác với CSDL: CRUD
+        if($conn->connect_error)
+            die("Kết nối thất bại. Chi tiết:" . $conn->connect_error);
+        $conn->set_charset("utf8"); //Hướng đối tượng
+        //mysqli_set_charset($conn,"utf8"); -- Hướng thủ tục   
+        return $conn;
+    }
     #Member function
     function display() {
         echo "Price: " . $this->price . "<br>";
@@ -107,5 +116,52 @@ class Book {
         $count = sizeof(Book::getListFromFile());
         if($linecount > $count) return true;
         return false;
+    }
+    static function getListFromDB(){
+        $conn = Book::connect();
+        $sql = "SELECT * FROM book";
+        $result = $conn->query($sql);
+        $lsBook = array();
+        if($result->num_rows > 0){
+            while($row = $result -> fetch_assoc()){
+               // $book = new Book($row[0],$row[1],$row[2],$row[3],$row[4]);
+                $book = new Book($row["ID"],$row["Price"],$row["Title"],$row["Author"],$row["Year"]);              
+                array_push($lsBook, $book);
+            }
+        }
+        //B3: Giải phóng kết nối
+        $conn->close();
+        return $lsBook;
+    }
+    static function addToDB(Book $content){
+        $conn = Book::connect(); 
+        $sql = "INSERT INTO book (ID, Title, Price, Author, Year) VALUES (NULL, '$content->title', $content->price, '$content->author', $content->year)";
+        $result = $conn->query($sql);
+        if($result == true)
+            echo 'Tạo thành công';
+        else echo 'Tạo thất bại';
+        //B3: Giải phóng kết nối
+        $conn->close();
+       
+    }
+    static function editDB(Book $content){
+        $conn = Book::connect(); 
+        $sql = "UPDATE book SET Title = '$content->title' , Price = $content->price , Author = '$content->author' , Year = $content->year  WHERE ID = $content->id";
+        $result = $conn->query($sql);
+        if($result == true)
+            echo 'Sửa thành công';
+        else echo 'Sửa thất bại';
+        //B3: Giải phóng kết nối
+        $conn->close(); 
+    }
+    static function deleteDB($id){
+        $conn = Book::connect(); 
+        $sql = "DELETE FROM book WHERE ID = $id";
+        $result = $conn->query($sql);
+        if($result == true)
+            echo 'Xóa thành công';
+        else echo 'Xóa thất bại';
+        //B3: Giải phóng kết nối
+        $conn->close(); 
     }
 }
