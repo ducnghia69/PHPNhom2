@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 09, 2019 at 03:11 PM
+-- Generation Time: Nov 09, 2019 at 03:14 PM
 -- Server version: 5.7.26
 -- PHP Version: 7.2.18
 
@@ -37,7 +37,6 @@ CREATE TABLE IF NOT EXISTS `contact` (
   `isMajor` tinyint(1) NOT NULL,
   `IDUser` int(11) NOT NULL,
   PRIMARY KEY (`IDContact`),
-  UNIQUE KEY `Phone` (`Phone`),
   KEY `IDUser` (`IDUser`)
 ) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -58,88 +57,6 @@ INSERT INTO `contact` (`IDContact`, `Name`, `Email`, `Phone`, `isMajor`, `IDUser
 (10, '123123', 'ndnghia69@gmail.com', '123123', 1, 1),
 (11, 'nghia', 'ndnghia69@gmail.com', '12312321321321312x3123123', 1, 1);
 
--- --------------------------------------------------------
-
---
--- Table structure for table `contact_label`
---
-
-DROP TABLE IF EXISTS `contact_label`;
-CREATE TABLE IF NOT EXISTS `contact_label` (
-  `IDContact` int(11) NOT NULL,
-  `IDLabel` int(11) NOT NULL,
-  PRIMARY KEY (`IDContact`,`IDLabel`),
-  KEY `IDLabel` (`IDLabel`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Dumping data for table `contact_label`
---
-
-INSERT INTO `contact_label` (`IDContact`, `IDLabel`) VALUES
-(1, 1),
-(5, 1),
-(1, 2),
-(6, 2),
-(7, 2),
-(2, 3),
-(3, 3),
-(4, 3),
-(6, 3),
-(2, 4),
-(3, 4);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `label`
---
-
-DROP TABLE IF EXISTS `label`;
-CREATE TABLE IF NOT EXISTS `label` (
-  `IDLabel` int(11) NOT NULL AUTO_INCREMENT,
-  `LabelName` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
-  `IDUser` int(11) NOT NULL,
-  PRIMARY KEY (`IDLabel`),
-  KEY `IDUser` (`IDUser`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Dumping data for table `label`
---
-
-INSERT INTO `label` (`IDLabel`, `LabelName`, `IDUser`) VALUES
-(1, 'Gia Đình', 1),
-(2, 'Người yêu', 1),
-(3, 'Chó', 2),
-(4, 'Mèo', 2),
-(5, 'Người trong mộng', 1),
-(6, 'Người trong mộng 2', 1);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user`
---
-
-DROP TABLE IF EXISTS `user`;
-CREATE TABLE IF NOT EXISTS `user` (
-  `IDUser` int(11) NOT NULL AUTO_INCREMENT,
-  `UserName` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
-  `PassWord` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
-  `FullName` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`IDUser`),
-  UNIQUE KEY `UserName` (`UserName`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Dumping data for table `user`
---
-
-INSERT INTO `user` (`IDUser`, `UserName`, `PassWord`, `FullName`) VALUES
-(1, 'ducnghia', '123', 'Nguyễn Đức Nghĩa'),
-(2, 'lenhhoxung', '123', 'Lệnh Hồ Xung');
-
 --
 -- Constraints for dumped tables
 --
@@ -149,19 +66,6 @@ INSERT INTO `user` (`IDUser`, `UserName`, `PassWord`, `FullName`) VALUES
 --
 ALTER TABLE `contact`
   ADD CONSTRAINT `contact_ibfk_1` FOREIGN KEY (`IDUser`) REFERENCES `user` (`IDUser`);
-
---
--- Constraints for table `contact_label`
---
-ALTER TABLE `contact_label`
-  ADD CONSTRAINT `contact_label_ibfk_1` FOREIGN KEY (`IDContact`) REFERENCES `contact` (`IDContact`),
-  ADD CONSTRAINT `contact_label_ibfk_2` FOREIGN KEY (`IDLabel`) REFERENCES `label` (`IDLabel`);
-
---
--- Constraints for table `label`
---
-ALTER TABLE `label`
-  ADD CONSTRAINT `label_ibfk_1` FOREIGN KEY (`IDUser`) REFERENCES `user` (`IDUser`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
