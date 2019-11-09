@@ -44,8 +44,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <form action="" method="post">
                     <div class="form-group">
                         <div class="form-label-group">
-                            <input type="email" id="inputEmail" class="form-control" name="email" placeholder="Email address" required="required" autofocus="autofocus">
-                            <label for="inputEmail">Email address</label>
+                            <input type="text" id="inputEmail" class="form-control" name="email" placeholder="Email address"  autofocus="autofocus">
+                            <label for="inputEmail">user</label>
                         </div>
                     </div>
                     <div class="form-group">

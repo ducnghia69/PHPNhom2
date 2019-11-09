@@ -117,9 +117,11 @@ class Book {
         if($linecount > $count) return true;
         return false;
     }
-    static function getListFromDB(){
+    static function getListFromDB($key = null){
         $conn = Book::connect();
         $sql = "SELECT * FROM book";
+        if($key != null)
+            $sql .= " WHERE  Title LIKE '%$key%' or Author LIKE '%$key%' or Year = '$key'";
         $result = $conn->query($sql);
         $lsBook = array();
         if($result->num_rows > 0){

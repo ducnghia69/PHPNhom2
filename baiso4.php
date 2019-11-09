@@ -53,24 +53,26 @@ if (strpos($_SERVER['REQUEST_URI'], "search")) {
 	$keyWord = $_REQUEST['search'];
 }
 if($keyWord == "") $keyWord = null;
+$lsFormDB = Book::getListFromDB($keyWord);
 $lsFromFile = Book::getListFromFile($keyWord);
 
 //Chia 1 trang gồm 5 trường
 $numberPage = 5;
-if(count($lsFromFile)%$numberPage == 0)
-	$countPage = intval(count($lsFromFile)/$numberPage);
-else $countPage = intval(count($lsFromFile)/$numberPage) + 1;
+if(count($lsFormDB)%$numberPage == 0)
+	$countPage = intval(count($lsFormDB)/$numberPage);
+else $countPage = intval(count($lsFormDB)/$numberPage) + 1;
+var_dump($countPage);
 //lấy request
 if (isset($_REQUEST["page"])) {	
 	$page = $_REQUEST["page"];
 }else $page = 1;
 $fromPage = $page*$numberPage - $numberPage;
 $toPage = $page*$numberPage ;
-if($toPage > count($lsFromFile))
-	$toPage = count($lsFromFile);
+if($toPage > count($lsFormDB))
+	$toPage = count($lsFormDB);
 //Test DB
 
-$lsFormDB = Book::getListFromDB();
+//$lsFormDB = Book::getListFromDB();
 
 /* Kết nối với database
 	for ($i = 0; $i < count($lsFormDB); $i++) { ?>
@@ -112,7 +114,7 @@ $lsFormDB = Book::getListFromDB();
 		</thead>
 		<tbody>
 			<?php
-			for ($i = 0; $i < count($lsFormDB); $i++) { ?>
+			for ($i = $fromPage; $i < $toPage; $i++) { ?>
 				<tr>
 					<th scope="row"><?php echo $lsFormDB[$i]->id ?></th>
 					<td><?php echo $lsFormDB[$i]->title ?></td>
@@ -215,7 +217,9 @@ $lsFormDB = Book::getListFromDB();
 					<li class="page-item <?php 
 							if (isset($_REQUEST["page"])) {	
 								$page = $_REQUEST["page"] + 1;
-								if($page >  $countPage) echo "disabled";
+								
+								if($page >  $countPage ) echo "disabled";
+								
 							}
 						?>"><a class="page-link" href="baiso4.php?page=<?php 
 								if($page >  $countPage  ) $page =  $countPage;
