@@ -76,7 +76,7 @@ class Contact {
         }  
         return $lsmajorcontact;
     }
-    static function addToDB(Contact $content){
+    static function addToDB(Contact $content, $data){
         
         global $user;
         $conn = Contact::connect(); 
@@ -86,10 +86,64 @@ class Contact {
         $result = $conn->query($sql);
         if($result != true)
            echo 'Không nhập số điện thoại bị trùng';
+        else{
+            
+            foreach($data as $key => $value){
+               
+                $sql2 = "INSERT INTO contact_label(IDContact, IDLabel) VALUES ( '$countcontact', '$value->idlabel')";
+                $result2 = $conn->query($sql2);
+                
+            }  
+        }
         //B3: Giải phóng kết nối
         $conn->close();
        
     }
-    
+    static function editDB(Contact $content, $data_delete, $data_add){
+        $conn = Contact::connect(); 
+        //var_dump($content->ismajor);
+        //sửa contact
+        $sql = "UPDATE contact SET Name = '$content->name' , Email = '$content->email' , Phone = '$content->phone' , isMajor = '$content->ismajor'  WHERE IDContact = '$content->idcontact'";
+        $result = $conn->query($sql);       
+        //xóa label
+        foreach($data_delete as $key => $value){
+            $sql1 = "DELETE FROM contact_label WHERE IDContact = $content->idcontact and IDLabel = $value";
+            $result1 = $conn->query($sql1);
+        }  
+        
+        //update label
+        foreach($data_add as $key => $value){
+               
+            $sql3 = "INSERT INTO contact_label(IDContact, IDLabel) VALUES ( '$content->idcontact', '$value')";
+            $result3 = $conn->query($sql3);
+            
+        }  
+        //B3: Giải phóng kết nối
+        $conn->close(); 
+    }
+    static function checkIsMajor($id){
+        $conn = Contact::connect(); 
+        //var_dump($content->ismajor);
+        $sql = "select IsMajor from contact where IDContact = '$id'";
+        $result = $conn->query($sql);
+        if($result->num_rows > 0){
+            while($row = $result -> fetch_assoc()){
+               // $book = new Book($row[0],$row[1],$row[2],$row[3],$row[4]);
+              
+                return $row["IsMajor"];
+            }
+        }
+        $conn->close();
+        return 0;
+    }
+    static function deleteDB($id){
+        $conn = Contact::connect(); 
+        $sql = "DELETE FROM contact_label WHERE IDContact = $id";
+        $result = $conn->query($sql);
+        $sql1 = "DELETE FROM contact WHERE IDContact = $id";
+        $result1 = $conn->query($sql1);
+        //B3: Giải phóng kết nối
+        $conn->close(); 
+    }
  }
 ?>

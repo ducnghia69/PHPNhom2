@@ -28,6 +28,7 @@ include_once("header.php") ?>
         border: none;
     }
 </style>
+
 <!--Navbar-->
 <?php 
     if (isset($_REQUEST["add"])) {     
@@ -41,22 +42,71 @@ include_once("header.php") ?>
         $contact =  new Contact(null,$name,$email, $phone,$ismajor, null);
         //$content = $id . "#" . $price . "#" . $title . "#" . $author . "#" . $year;
         //Book::addToFile($content);
-        Contact::addToDB($contact);
+        $data_res = array();
+        foreach($_POST as $key => $value){
+            if($key != "namecontact" && $key != "email" && $key != "phone" && $key != "ismajor"  && $key != "add" ){
+                $label = new Label($key, $value, null);
+                array_push($data_res, $label);
+            }            
+          }
+         
+        Contact::addToDB($contact, $data_res);
     }else if (isset($_REQUEST["AddLabel"])) {     
         $namelabel = $_REQUEST["namelabel"];
         $label =  new Label(null,$namelabel,null);
         //$content = $id . "#" . $price . "#" . $title . "#" . $author . "#" . $year;
         //Book::addToFile($content);
         Label::addToDB($label);
+    }else if (isset($_REQUEST["edit"])) {     
+        $id = $_REQUEST["edit"];
+        $name = $_REQUEST["namecontact"];
+        $email = $_REQUEST["email"];
+        $phone = $_REQUEST["phone"];
+        if(Contact::checkIsMajor($id) == 1){
+            if(!isset($_REQUEST["ismajor"])){
+                $ismajor = 0;
+            }else $ismajor = 1;
+        }else{
+            if(isset($_REQUEST["ismajor"]))
+                $ismajor = 1;
+            else $ismajor = 0;
+        }    
+        $data_delete = array();
+        $data_add = array();
+
+        $lslabel_contact = LabelOfContact::GetListLabelOfContact($id);
+        foreach($lslabel_contact as $key2 => $value2){
+            $label = 'label'.$value2->idlabel;
+            if(!isset($_REQUEST["$label"])){
+                array_push($data_delete, $value2->idlabel);
+            }    
+        }
+        foreach($_POST as $key => $value){
+             if($key != "namecontact" && $key != "email" && $key != "phone" && $key != "ismajor"  && $key != "edit" ){
+                if(LabelOfContact::checkLabelOfContactFromIDLabel($id, $value) == null)
+                    if(isset($_REQUEST["$key"]))
+                        array_push($data_add, $value);
+           }            
+        }
+
+        
+        $contact =  new Contact($id,$name,$email, $phone,$ismajor, null);
+        //$content = $id . "#" . $price . "#" . $title . "#" . $author . "#" . $year;
+        //Book::addToFile($content);
+        Contact::editDB($contact,$data_delete,$data_add);
+    }else if (isset($_REQUEST["del"])) {     
+        $id = $_REQUEST["del"];     
+        Contact::deleteDB($id);
     }
     $keyWord = null;
+    
     if (strpos($_SERVER['REQUEST_URI'], "search")) { // hàm ktra chuỗi trước có chứa chuỗi sau không
       $keyWord = $_REQUEST['search'];      
     }
     $lscontact = Contact::GetListFromDB($keyWord);
     $lsmajorcontact = Contact::GetListMajorContactFromDB();
     $lslabelofcontact = LabelOfContact::GetLabelFromDatabase();
-    
+    $lslabel = Label::GetLabelFromDB();
 ?>
 <div class="container-fluid">
   <div class="row">
@@ -135,6 +185,7 @@ include_once("header.php") ?>
                     <th scope="col">Tên</th>
                     <th scope="col">Email</th>
                     <th scope="col">Số điện thoại</th>
+                    <th scope="col">Thao tác</th>
                     </tr>
                 </thead>
                 
@@ -148,6 +199,89 @@ include_once("header.php") ?>
                             <td><input type="checkbox"> <?php echo $value->name?></td>
                             <td><?php echo $value->email?></td>
                             <td><?php echo $value->phone?></td>
+                            <td>
+                                <button class="btn btn-outline-info mr-3" data-toggle="modal" data-target="#EditContactMajor<?php echo $value->idcontact ?>"><i class="far fa-edit"></i> Sửa</button>
+                                <button class="btn btn-outline-danger" name="delete" data-toggle="modal" data-target="#DeleteContact<?php echo $value->idcontact ?>"><i class="fas fa-trash-alt"></i> Xóa</button>
+                                <form action="" method="POST">
+                                    <div class="modal fade" id="EditContactMajor<?php echo $value->idcontact ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="exampleModalLongTitle">Edit Contact</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form method="post">
+                                                        <div class="form-group ">
+                                                            <label for="from">Name contact</label>
+                                                            <input type="text" class="form-control" name="namecontact" value="<?php echo $value->name?>" placeholder="Name contact">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="to">Email</label>
+                                                            <input type="email" class="form-control" name="email" value="<?php echo $value->email?>" placeholder="Email">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="class">Phone</label>
+                                                            <input type="text" class="form-control" name="phone" value="<?php echo $value->phone?>" placeholder="Phone">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="place" style="float: left; margin-right:10px; padding-top: 5px">Gắn dấu sao</label>
+                                                            <?php if($value->ismajor != 0) $checked = "checked"; else $checked = "" ?>
+                                                            <input type="checkbox" class="form-control" name="ismajor" <?php echo $checked?> style="width: 20px;">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="place" style="float: left; margin-right:10px; padding-top: 5px">Gắn nhãn</label><br><br>
+                                                            <?php 
+                                                                $lslabel_contact = LabelOfContact::GetListLabelOfContact($value->idcontact);
+                                                                foreach ($lslabel as $key1 => $value1) {
+                                                                        $checked = "";
+                                                                        foreach($lslabel_contact as $key2 => $value2){
+                                                                            if($value1->idlabel == $value2->idlabel){
+                                                                                $checked = "checked";
+                                                                                break;
+                                                                            }    
+                                                                        }
+                                                            ?>
+                                                                <input type="checkbox" name="label<?php echo $value1->idlabel?>" <?php echo $checked ?> value="<?php echo $value1->idlabel?>"> <?php echo $value1->labelname?><br>
+                                                            <?php } ?>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                            <button type="submit" class="btn btn-primary" name="edit" value="<?php echo $value->idcontact ?>">Save changes</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <!--end Edit-->
+
+                                <!--Delete-->
+                                <form action="" method="DELETE">
+                                    <div class="modal fade" id="DeleteContact<?php echo $value->idcontact ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="exampleModalLabel">Notice</h5>
+                                                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">×</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">Do you want to delete this?</div>
+                                                <div class="modal-footer">
+                                                    <button class="btn btn-danger" name="del" type="submit" value="<?php echo $value->idcontact?>">Delete</button>
+                                                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <!--end Delete-->
+                            </td>
+                            
                         </tr>
                     <?php } ?>
                     <tr> 
@@ -161,8 +295,91 @@ include_once("header.php") ?>
                             <td><input type="checkbox"> <?php echo $value->name?></td>
                             <td><?php echo $value->email?></td>
                             <td><?php echo $value->phone?></td>
+                            <td>
+                                <button class="btn btn-outline-info mr-3" data-toggle="modal" data-target="#EditContact<?php echo $value->idcontact ?>"><i class="far fa-edit"></i> Sửa</button>
+                                <button class="btn btn-outline-danger" name="delete" data-toggle="modal" data-target="#DeleteContact<?php echo $value->idcontact ?>"><i class="fas fa-trash-alt"></i> Xóa</button>
+                                <form action="" method="POST">
+                                    <div class="modal fade" id="EditContact<?php echo $value->idcontact ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="exampleModalLongTitle">Edit Contact</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form method="POST">
+                                                        <div class="form-group ">
+                                                            <label for="from">Name contact</label>
+                                                            <input type="text" class="form-control" name="namecontact" value="<?php echo $value->name?>" placeholder="Name contact">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="to">Email</label>
+                                                            <input type="email" class="form-control" name="email" value="<?php echo $value->email?>" placeholder="Email">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="class">Phone</label>
+                                                            <input type="text" class="form-control" name="phone" value="<?php echo $value->phone?>" placeholder="Phone">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="place" style="float: left; margin-right:10px; padding-top: 5px">Gắn dấu sao</label>
+                                                            <?php if($value->ismajor != 0) $checked = "checked"; else $checked = "" ?>
+                                                            <input type="checkbox" class="form-control" name="ismajor" <?php echo $checked?> style="width: 20px;">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="place" style="float: left; margin-right:10px; padding-top: 5px">Gắn nhãn</label><br><br>
+                                                            <?php 
+                                                                $lslabel_contact = LabelOfContact::GetListLabelOfContact($value->idcontact);
+                                                                foreach ($lslabel as $key1 => $value1) {
+                                                                        $checked = "";
+                                                                        foreach($lslabel_contact as $key2 => $value2){
+                                                                            if($value1->idlabel == $value2->idlabel){
+                                                                                $checked = "checked";
+                                                                                break;
+                                                                            }    
+                                                                        }
+                                                            ?>
+                                                                <input type="checkbox" name="label<?php echo $value1->idlabel?>" <?php echo $checked ?> value="<?php echo $value1->idlabel?>"> <?php echo $value1->labelname?><br>
+                                                            <?php } ?>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                            <button type="submit" class="btn btn-primary" name="edit" value="<?php echo $value->idcontact ?>">Save changes</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <!--end Edit-->
+
+                                <!--Delete-->
+                                <form action="" method="DELETE">
+                                    <div class="modal fade" id="DeleteContact<?php echo $value->idcontact ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="exampleModalLabel">Notice</h5>
+                                                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">×</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">Do you want to delete this?</div>
+                                                <div class="modal-footer">
+                                                    <button class="btn btn-danger" name="del" type="submit" value="<?php echo $value->idcontact?>">Delete</button>
+                                                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <!--end Delete-->
+                            </td>
                         </tr>
                     <?php } ?>
+
                 </tbody>
                 
             </table>
@@ -201,7 +418,14 @@ include_once("header.php") ?>
 					<div class="form-group">
 						<label for="place" style="float: left; margin-right:10px; padding-top: 5px">Gắn dấu sao</label>
 						<input type="checkbox" class="form-control" name="ismajor" value="1" style="width: 20px;">
-					</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="place" style="float: left; margin-right:10px; padding-top: 5px">Gắn nhãn</label><br><br>
+                        <?php foreach ($lslabel as $key => $value) {?>
+                            <input type="checkbox" name="<?php echo $value->idlabel?>" value="<?php echo $value->idlabel?>"> <?php echo $value->labelname?><br>
+                        <?php } ?>
+                        
+                    </div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 						<button type="submit" class="btn btn-primary" name="add">Save changes</button>
@@ -236,4 +460,4 @@ include_once("header.php") ?>
 		</div>
 	</div>
 </div>
-<?php include_once("footer.php") ?>
+<?php  include_once("footer.php") ?>

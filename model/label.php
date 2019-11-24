@@ -45,5 +45,22 @@ class Label {
         $conn->close();
        
     }
+    static function GetLabelFromDB(){
+        global $user;
+        $conn = Label::connect();
+        $sql = "SELECT * FROM label WHERE IDUser = '$user->idUser'";
+        $result = $conn->query($sql);   
+        $lslabel = array();  
+        if($result->num_rows > 0){
+            while($row = $result -> fetch_assoc()){
+               // $book = new Book($row[0],$row[1],$row[2],$row[3],$row[4]);
+                $label = new Label($row["IDLabel"],$row["LabelName"],$user->idUser);              
+                array_push($lslabel, $label);
+            }
+        }
+        //B3: Giải phóng kết nối
+        $conn->close();
+        return $lslabel;
+    }
  }
 ?>
