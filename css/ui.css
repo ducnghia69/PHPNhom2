@@ -146,8 +146,8 @@ a:hover {
 
 /* ============== spacing ============== */
 .padding-y {
-  padding-top: 40px;
-  padding-bottom: 40px; }
+  padding-top: 0;
+  padding-bottom: 0; }
 
 .padding-top {
   padding-top: 40px; }

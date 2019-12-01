@@ -27,10 +27,13 @@ class Product {
         //mysqli_set_charset($conn,"utf8"); -- Hướng thủ tục   
         return $conn;
     }
-    static function GetProductFromDB(){
-       
+    static function GetProductFromDB($key = null){
+      
         $conn = Product::connect();
         $sql = "SELECT * FROM product";
+        if($key != null) 
+            $sql .= " WHERE NameProduct LIKE '%$key%'";
+       
         //if($key != null)
          //   $sql .= " WHERE  Title LIKE '%$key%' or Author LIKE '%$key%' or Year = '$key'";
         $result = $conn->query($sql);

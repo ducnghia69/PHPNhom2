@@ -1,7 +1,7 @@
 <?php 
 session_start();
 include_once("model/product.php");
-
+include_once("header-shopping.php");
 if (!isset($_SESSION["lsCart"])) {    
 	$lsCart = array();
 }
@@ -9,144 +9,15 @@ else {
 	$lsCart = unserialize($_SESSION["lsCart"]);
 }
 
-$lsproduct = Product::GetProductFromDB();
+if (isset($_REQUEST["key"]))
+	$key = $_REQUEST["key"];
+$lsproduct = Product::GetProductFromDB($key);
+
 ?>
-<!DOCTYPE HTML>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta http-equiv="pragma" content="no-cache" />
-<meta http-equiv="cache-control" content="max-age=604800" />
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-<title>Website title - bootstrap html template</title>
-
-<link href="images/favicon.ico" rel="shortcut icon" type="image/x-icon">
-
-<!-- jQuery -->
-<script src="js/jquery-2.0.0.min.js" type="text/javascript"></script>
-
-<!-- Bootstrap4 files-->
-<script src="js/bootstrap.bundle.min.js" type="text/javascript"></script>
-<link href="css/bootstrap.css" rel="stylesheet" type="text/css"/>
-
-
-<!-- custom style -->
-<link href="css/ui.css" rel="stylesheet" type="text/css"/>
-<link href="css/responsive.css" rel="stylesheet" media="only screen and (max-width: 1200px)" />
-
-<!-- custom javascript -->
-<script src="js/script.js" type="text/javascript"></script>
-<script src="https://kit.fontawesome.com/ed2ebf20a8.js" crossorigin="anonymous"></script>
-<script type="text/javascript">
-/// some script
-
-// jquery ready start
-$(document).ready(function() {
-	// jQuery code
-
-}); 
-// jquery end
-</script>
-
-</head>
-<body>
-
-
-<header class="section-header">
-
-<section class="header-main border-bottom">
-	<div class="container">
-<div class="row align-items-center">
-	<div class="col-lg-2 col-4">
-		<a href="shopping" class="brand-wrap">
-			<img class="logo" src="images/logo.png">
-		</a> <!-- brand-wrap.// -->
-	</div>
-	<div class="col-lg-6 col-sm-12">
-		<form action="#" class="search">
-			<div class="input-group w-100">
-			    <input type="text" class="form-control" placeholder="Tìm kiếm">
-			    <div class="input-group-append">
-			      <button class="btn btn-primary" type="submit">
-			        <i class="fa fa-search"></i>
-			      </button>
-			    </div>
-		    </div>
-		</form> <!-- search-wrap .end// -->
-	</div> <!-- col.// -->
-	<div class="col-lg-4 col-sm-6 col-12">
-		<div class="widgets-wrap float-md-right">
-			<div class="widget-header  mr-3">
-				<a href="shopping-cart" class="icon icon-sm rounded-circle border"><i class="fa fa-shopping-cart"></i></a>
-				<span class="badge badge-pill badge-danger notify">0</span>
-			</div>
-			<div class="widget-header icontext">
-				<a href="#" class="icon icon-sm rounded-circle border"><i class="fa fa-user"></i></a>
-				<div class="text">
-					<span class="text-muted">Xin chào Nghĩa!</span>
-					<div> 
-						<a href="#">Đăng nhập</a> |  
-						<a href="#"> Đăng ký</a>
-					</div>
-				</div>
-			</div>
-
-		</div> <!-- widgets-wrap.// -->
-	</div> <!-- col.// -->
-</div> <!-- row.// -->
-	</div> <!-- container.// -->
-</section> <!-- header-main .// -->
-</header> <!-- section-header.// -->
-
-
-<nav class="navbar navbar-main navbar-expand-lg navbar-light border-bottom">
-  <div class="container">
-
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main_nav" aria-controls="main_nav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="main_nav">
-      <ul class="navbar-nav">
-      	<li class="nav-item dropdown">
-           <a class="nav-link" href="#">Trang chủ</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Giới thiệu</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Sản phẩm</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Khuyến mãi & Sự kiện</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Tin tức</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Hàng quốc tế</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"> More</a>
-          <div class="dropdown-menu">
-            <a class="dropdown-item" href="#">Đồ ăn</a>
-            <a class="dropdown-item" href="#">Đồ uống</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">Gia dụng</a>
-            <a class="dropdown-item" href="#">Điện tử</a>
-            <a class="dropdown-item" href="#">Đồ chơi</a>
-          </div>
-        </li>
-      </ul>
-    </div> <!-- collapse .// -->
-  </div> <!-- container .// -->
-</nav>
-
-</header> <!-- section-header.// -->
 
 
 <!-- ========================= SECTION MAIN ========================= -->
+<?php if($key == null) { ?>
 <section class="section-main bg padding-y">
 <div class="container">
 
@@ -179,6 +50,7 @@ $(document).ready(function() {
 </div> <!-- row.// -->
 </div> <!-- container //  -->
 </section>
+<?php } ?>
 <!-- ========================= SECTION MAIN END// ========================= -->
 
 <!-- ========================= SECTION  ========================= -->
@@ -206,7 +78,7 @@ $(document).ready(function() {
 			<a href="#" class="img-wrap"> <img src="<?php echo $value->image?>"> </a>
 			<figcaption class="info-wrap">
 				<a href="#" class="title" style="height: 50px"><?php echo $value->nameproduct?></a>
-				<div class="price mt-1"><?php echo $value->price?>đ</div> <!-- price-wrap.// -->
+				<div class="price mt-1"><?php echo number_format($value->price, 0, '.', '.') ?>₫</div> <!-- price-wrap.// -->
 			</figcaption>
 		</div>
 	</div> <!-- col.// -->
